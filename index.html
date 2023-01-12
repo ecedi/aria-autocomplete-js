@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Aria Autocomplete</title>
+        <meta name="description" content="Accessible, extensible, plain JavaScript autocomplete with multi-select" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@leon_slater" />
+        <meta name="twitter:title" content="Aria-Autocomplete" />
+        <meta
+            name="twitter:description"
+            content="Fast, accessible, extensible, plain JavaScript autocomplete with multi-select"
+        />
+        <link rel="stylesheet" href="dist/aria-autocomplete.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/a11y-dark.min.css" />
+        <style type="text/css">
+            html {
+                color: #434343;
+                font-family: Arial, Helvetica, sans-serif;
+                background: #fcfcfb;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                line-height: 1.5em;
+            }
+            code {
+                font-family: monospace;
+                font-size: 1rem;
+                background: #f3f3f3;
+                border: 0.1875rem solid #f3f3f3;
+                font-weight: normal;
+                color: #000;
+            }
+            pre code {
+                border: none;
+            }
+            h1,
+            h2,
+            h3 {
+                font-weight: normal;
+            }
+            h1 {
+                font-size: 2.25rem;
+                line-height: 1;
+                display: flex;
+                flex-wrap: wrap;
+                width: 100%;
+                justify-content: space-between;
+                align-content: center;
+            }
+            h1 span {
+                display: block;
+            }
+            h1 small {
+                width: 100%;
+                font-size: 50%;
+                margin-top: 0.9375rem;
+                display: block;
+                line-height: 1.3;
+                box-sizing: border-box;
+            }
+            h2 {
+                font-size: 1.75rem;
+            }
+            label {
+                display: inline-block;
+                margin-bottom: 0.1875rem;
+            }
+            .button {
+                display: inline-block;
+                padding: 0.4375rem 1rem;
+                border: 0.125rem solid #434143;
+                background-color: transparent;
+                border-radius: 0.25rem;
+                text-decoration: none;
+                font-size: 1.125rem;
+                color: #434143;
+            }
+            .button:hover,
+            .button:focus {
+                background-color: #434143;
+                color: #fcfcfb;
+            }
+            section {
+                margin-top: 1.5rem;
+            }
+            section ~ section {
+                margin-top: 3rem;
+                padding-top: 1.5rem;
+                border-top: 0.125rem solid #606060;
+            }
+            dt,
+            dd {
+                display: block;
+                padding: 0 0 0 0.75rem;
+                border-left: 0.1875rem solid #606060;
+                margin: 0;
+            }
+            dt {
+                font-weight: bold;
+                margin-top: 0.9375rem;
+            }
+            dl > div ~ div {
+                margin-top: 1.875rem;
+                padding-top: 1.875rem;
+                border-top: 0.0625rem solid #d8d8d8;
+            }
+            dl > div dt:first-child {
+                margin-top: 0;
+            }
+            a:focus,
+            input:focus,
+            [tabindex="0"]:focus,
+            .aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--focused {
+                outline: none;
+                border-color: #5e9ed6;
+                box-shadow: 0 0 0 0.0625rem #5e9ed6, 0 0 0.5rem rgba(94, 158, 214, 0.5);
+            }
+            #wrapper {
+                max-width: 47.5rem;
+                padding: 0 1.25rem;
+                margin: 3.75rem auto;
+                box-sizing: border-box;
+            }
+            .tile {
+                background: #fff;
+                margin: 0 auto 1.875rem;
+                padding: 1.875rem 1.5625rem;
+                border: 0.0625rem solid #ccc;
+                box-shadow: 0 0.125rem 0.3125rem rgba(0, 0, 0, 0.1);
+            }
+            .tile > h2,
+            .tile > h3 {
+                font-size: 1.375rem;
+                font-weight: normal;
+                padding-bottom: 0.9375rem;
+                border-bottom: 0.0625rem solid #ccc;
+            }
+            .tile > :first-child {
+                margin-top: 0;
+            }
+            .tile > :last-child {
+                margin-bottom: 0;
+            }
+
+            @media (max-width: 30rem) {
+                #wrapper {
+                    padding: 0 1.0625rem;
+                }
+                h1 span {
+                    width: 100%;
+                    margin-bottom: 0.9375rem;
+                }
+                .tile {
+                    padding: 1.375rem 1.0625rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="wrapper">
+            <header>
+                <h1>
+                    <span>Aria Autocomplete</span>
+                    <a class="button" href="https://www.github.com/mynamesleon/aria-autocomplete">On GitHub</a>
+                    <small>Accessible, extensible, plain JavaScript autocomplete with multi-select</small>
+                </h1>
+            </header>
+            <main>
+                <section id="features">
+                    <div class="tile">
+                        <h2>Key features</h2>
+                        <ul>
+                            <li><strong>Single and multiple selection support</strong></li>
+                            <li><strong>Accessibility</strong>: Use of ARIA attributes, custom screen reader announcements, and tested with assistive technologies.</li>
+                            <li><strong>Progressive enhancement</strong>: Automatic source building through specifying a &lt;select&gt; as the element, or an element with child checkboxes.</li>
+                            <li><strong>Extensible source options</strong>: Array of Strings or Objects, Function (or Promise), or an endpoint.</li>
+                            <li><strong>Compatibility</strong>: Broad browser and device support (IE9+).</li>
+                            <li><strong>Starting values</strong>: Automatic selection based on starting values, including for checkboxes, select options, and for async handling.</li>
+                            <li><strong>Small script size</strong>: 10 kB gzipped.</li>
+                        </ul>
+                    </div>
+                    <div class="tile">
+                        <p>Grab from NPM and use in a module system, or grab the code from unpkg:</p>
+                        <pre><code class="lang-bash">npm install aria-autocomplete</code></pre>
+                        <pre><code class="lang-html">&lt;script src="https://unpkg.com/aria-autocomplete"&gt;&lt;/script&gt;</code></pre>
+                        <p>And call with an element and options:</p>
+                        <pre><code class="lang-javascript">AriaAutocomplete(element, options);</code></pre>
+                    </div>
+                </section>
+                <script>
+                    var countryListAllIsoData=[{code:"AF",code3:"AFG",name:"Afghanistan",number:"004"},{code:"AL",code3:"ALB",name:"Albania",number:"008"},{code:"DZ",code3:"DZA",name:"Algeria",number:"012"},{code:"AS",code3:"ASM",name:"American Samoa",number:"016"},{code:"AD",code3:"AND",name:"Andorra",number:"020"},{code:"AO",code3:"AGO",name:"Angola",number:"024"},{code:"AI",code3:"AIA",name:"Anguilla",number:"660"},{code:"AQ",code3:"ATA",name:"Antarctica",number:"010"},{code:"AG",code3:"ATG",name:"Antigua and Barbuda",number:"028"},{code:"AR",code3:"ARG",name:"Argentina",number:"032"},{code:"AM",code3:"ARM",name:"Armenia",number:"051"},{code:"AW",code3:"ABW",name:"Aruba",number:"533"},{code:"AU",code3:"AUS",name:"Australia",number:"036"},{code:"AT",code3:"AUT",name:"Austria",number:"040"},{code:"AZ",code3:"AZE",name:"Azerbaijan",number:"031"},{code:"BS",code3:"BHS",name:"Bahamas (the)",number:"044"},{code:"BH",code3:"BHR",name:"Bahrain",number:"048"},{code:"BD",code3:"BGD",name:"Bangladesh",number:"050"},{code:"BB",code3:"BRB",name:"Barbados",number:"052"},{code:"BY",code3:"BLR",name:"Belarus",number:"112"},{code:"BE",code3:"BEL",name:"Belgium",number:"056"},{code:"BZ",code3:"BLZ",name:"Belize",number:"084"},{code:"BJ",code3:"BEN",name:"Benin",number:"204"},{code:"BM",code3:"BMU",name:"Bermuda",number:"060"},{code:"BT",code3:"BTN",name:"Bhutan",number:"064"},{code:"BO",code3:"BOL",name:"Bolivia (Plurinational State of)",number:"068"},{code:"BQ",code3:"BES",name:"Bonaire, Sint Eustatius and Saba",number:"535"},{code:"BA",code3:"BIH",name:"Bosnia and Herzegovina",number:"070"},{code:"BW",code3:"BWA",name:"Botswana",number:"072"},{code:"BV",code3:"BVT",name:"Bouvet Island",number:"074"},{code:"BR",code3:"BRA",name:"Brazil",number:"076"},{code:"IO",code3:"IOT",name:"British Indian Ocean Territory (the)",number:"086"},{code:"BN",code3:"BRN",name:"Brunei Darussalam",number:"096"},{code:"BG",code3:"BGR",name:"Bulgaria",number:"100"},{code:"BF",code3:"BFA",name:"Burkina Faso",number:"854"},{code:"BI",code3:"BDI",name:"Burundi",number:"108"},{code:"CV",code3:"CPV",name:"Cabo Verde",number:"132"},{code:"KH",code3:"KHM",name:"Cambodia",number:"116"},{code:"CM",code3:"CMR",name:"Cameroon",number:"120"},{code:"CA",code3:"CAN",name:"Canada",number:"124"},{code:"KY",code3:"CYM",name:"Cayman Islands (the)",number:"136"},{code:"CF",code3:"CAF",name:"Central African Republic (the)",number:"140"},{code:"TD",code3:"TCD",name:"Chad",number:"148"},{code:"CL",code3:"CHL",name:"Chile",number:"152"},{code:"CN",code3:"CHN",name:"China",number:"156"},{code:"CX",code3:"CXR",name:"Christmas Island",number:"162"},{code:"CC",code3:"CCK",name:"Cocos (Keeling) Islands (the)",number:"166"},{code:"CO",code3:"COL",name:"Colombia",number:"170"},{code:"KM",code3:"COM",name:"Comoros (the)",number:"174"},{code:"CD",code3:"COD",name:"Congo (the Democratic Republic of the)",number:"180"},{code:"CG",code3:"COG",name:"Congo (the)",number:"178"},{code:"CK",code3:"COK",name:"Cook Islands (the)",number:"184"},{code:"CR",code3:"CRI",name:"Costa Rica",number:"188"},{code:"HR",code3:"HRV",name:"Croatia",number:"191"},{code:"CU",code3:"CUB",name:"Cuba",number:"192"},{code:"CW",code3:"CUW",name:"Curaçao",number:"531"},{code:"CY",code3:"CYP",name:"Cyprus",number:"196"},{code:"CZ",code3:"CZE",name:"Czechia",number:"203"},{code:"CI",code3:"CIV",name:"Côte d'Ivoire",number:"384"},{code:"DK",code3:"DNK",name:"Denmark",number:"208"},{code:"DJ",code3:"DJI",name:"Djibouti",number:"262"},{code:"DM",code3:"DMA",name:"Dominica",number:"212"},{code:"DO",code3:"DOM",name:"Dominican Republic (the)",number:"214"},{code:"EC",code3:"ECU",name:"Ecuador",number:"218"},{code:"EG",code3:"EGY",name:"Egypt",number:"818"},{code:"SV",code3:"SLV",name:"El Salvador",number:"222"},{code:"GQ",code3:"GNQ",name:"Equatorial Guinea",number:"226"},{code:"ER",code3:"ERI",name:"Eritrea",number:"232"},{code:"EE",code3:"EST",name:"Estonia",number:"233"},{code:"SZ",code3:"SWZ",name:"Eswatini",number:"748"},{code:"ET",code3:"ETH",name:"Ethiopia",number:"231"},{code:"FK",code3:"FLK",name:"Falkland Islands (the) [Malvinas]",number:"238"},{code:"FO",code3:"FRO",name:"Faroe Islands (the)",number:"234"},{code:"FJ",code3:"FJI",name:"Fiji",number:"242"},{code:"FI",code3:"FIN",name:"Finland",number:"246"},{code:"FR",code3:"FRA",name:"France",number:"250"},{code:"GF",code3:"GUF",name:"French Guiana",number:"254"},{code:"PF",code3:"PYF",name:"French Polynesia",number:"258"},{code:"TF",code3:"ATF",name:"French Southern Territories (the)",number:"260"},{code:"GA",code3:"GAB",name:"Gabon",number:"266"},{code:"GM",code3:"GMB",name:"Gambia (the)",number:"270"},{code:"GE",code3:"GEO",name:"Georgia",number:"268"},{code:"DE",code3:"DEU",name:"Germany",number:"276"},{code:"GH",code3:"GHA",name:"Ghana",number:"288"},{code:"GI",code3:"GIB",name:"Gibraltar",number:"292"},{code:"GR",code3:"GRC",name:"Greece",number:"300"},{code:"GL",code3:"GRL",name:"Greenland",number:"304"},{code:"GD",code3:"GRD",name:"Grenada",number:"308"},{code:"GP",code3:"GLP",name:"Guadeloupe",number:"312"},{code:"GU",code3:"GUM",name:"Guam",number:"316"},{code:"GT",code3:"GTM",name:"Guatemala",number:"320"},{code:"GG",code3:"GGY",name:"Guernsey",number:"831"},{code:"GN",code3:"GIN",name:"Guinea",number:"324"},{code:"GW",code3:"GNB",name:"Guinea-Bissau",number:"624"},{code:"GY",code3:"GUY",name:"Guyana",number:"328"},{code:"HT",code3:"HTI",name:"Haiti",number:"332"},{code:"HM",code3:"HMD",name:"Heard Island and McDonald Islands",number:"334"},{code:"VA",code3:"VAT",name:"Holy See (the)",number:"336"},{code:"HN",code3:"HND",name:"Honduras",number:"340"},{code:"HK",code3:"HKG",name:"Hong Kong",number:"344"},{code:"HU",code3:"HUN",name:"Hungary",number:"348"},{code:"IS",code3:"ISL",name:"Iceland",number:"352"},{code:"IN",code3:"IND",name:"India",number:"356"},{code:"ID",code3:"IDN",name:"Indonesia",number:"360"},{code:"IR",code3:"IRN",name:"Iran (Islamic Republic of)",number:"364"},{code:"IQ",code3:"IRQ",name:"Iraq",number:"368"},{code:"IE",code3:"IRL",name:"Ireland",number:"372"},{code:"IM",code3:"IMN",name:"Isle of Man",number:"833"},{code:"IL",code3:"ISR",name:"Israel",number:"376"},{code:"IT",code3:"ITA",name:"Italy",number:"380"},{code:"JM",code3:"JAM",name:"Jamaica",number:"388"},{code:"JP",code3:"JPN",name:"Japan",number:"392"},{code:"JE",code3:"JEY",name:"Jersey",number:"832"},{code:"JO",code3:"JOR",name:"Jordan",number:"400"},{code:"KZ",code3:"KAZ",name:"Kazakhstan",number:"398"},{code:"KE",code3:"KEN",name:"Kenya",number:"404"},{code:"KI",code3:"KIR",name:"Kiribati",number:"296"},{code:"KP",code3:"PRK",name:"Korea (the Democratic People's Republic of)",number:"408"},{code:"KR",code3:"KOR",name:"Korea (the Republic of)",number:"410"},{code:"KW",code3:"KWT",name:"Kuwait",number:"414"},{code:"KG",code3:"KGZ",name:"Kyrgyzstan",number:"417"},{code:"LA",code3:"LAO",name:"Lao People's Democratic Republic (the)",number:"418"},{code:"LV",code3:"LVA",name:"Latvia",number:"428"},{code:"LB",code3:"LBN",name:"Lebanon",number:"422"},{code:"LS",code3:"LSO",name:"Lesotho",number:"426"},{code:"LR",code3:"LBR",name:"Liberia",number:"430"},{code:"LY",code3:"LBY",name:"Libya",number:"434"},{code:"LI",code3:"LIE",name:"Liechtenstein",number:"438"},{code:"LT",code3:"LTU",name:"Lithuania",number:"440"},{code:"LU",code3:"LUX",name:"Luxembourg",number:"442"},{code:"MO",code3:"MAC",name:"Macao",number:"446"},{code:"MG",code3:"MDG",name:"Madagascar",number:"450"},{code:"MW",code3:"MWI",name:"Malawi",number:"454"},{code:"MY",code3:"MYS",name:"Malaysia",number:"458"},{code:"MV",code3:"MDV",name:"Maldives",number:"462"},{code:"ML",code3:"MLI",name:"Mali",number:"466"},{code:"MT",code3:"MLT",name:"Malta",number:"470"},{code:"MH",code3:"MHL",name:"Marshall Islands (the)",number:"584"},{code:"MQ",code3:"MTQ",name:"Martinique",number:"474"},{code:"MR",code3:"MRT",name:"Mauritania",number:"478"},{code:"MU",code3:"MUS",name:"Mauritius",number:"480"},{code:"YT",code3:"MYT",name:"Mayotte",number:"175"},{code:"MX",code3:"MEX",name:"Mexico",number:"484"},{code:"FM",code3:"FSM",name:"Micronesia (Federated States of)",number:"583"},{code:"MD",code3:"MDA",name:"Moldova (the Republic of)",number:"498"},{code:"MC",code3:"MCO",name:"Monaco",number:"492"},{code:"MN",code3:"MNG",name:"Mongolia",number:"496"},{code:"ME",code3:"MNE",name:"Montenegro",number:"499"},{code:"MS",code3:"MSR",name:"Montserrat",number:"500"},{code:"MA",code3:"MAR",name:"Morocco",number:"504"},{code:"MZ",code3:"MOZ",name:"Mozambique",number:"508"},{code:"MM",code3:"MMR",name:"Myanmar",number:"104"},{code:"NA",code3:"NAM",name:"Namibia",number:"516"},{code:"NR",code3:"NRU",name:"Nauru",number:"520"},{code:"NP",code3:"NPL",name:"Nepal",number:"524"},{code:"NL",code3:"NLD",name:"Netherlands (the)",number:"528"},{code:"NC",code3:"NCL",name:"New Caledonia",number:"540"},{code:"NZ",code3:"NZL",name:"New Zealand",number:"554"},{code:"NI",code3:"NIC",name:"Nicaragua",number:"558"},{code:"NE",code3:"NER",name:"Niger (the)",number:"562"},{code:"NG",code3:"NGA",name:"Nigeria",number:"566"},{code:"NU",code3:"NIU",name:"Niue",number:"570"},{code:"NF",code3:"NFK",name:"Norfolk Island",number:"574"},{code:"MP",code3:"MNP",name:"Northern Mariana Islands (the)",number:"580"},{code:"NO",code3:"NOR",name:"Norway",number:"578"},{code:"OM",code3:"OMN",name:"Oman",number:"512"},{code:"PK",code3:"PAK",name:"Pakistan",number:"586"},{code:"PW",code3:"PLW",name:"Palau",number:"585"},{code:"PS",code3:"PSE",name:"Palestine, State of",number:"275"},{code:"PA",code3:"PAN",name:"Panama",number:"591"},{code:"PG",code3:"PNG",name:"Papua New Guinea",number:"598"},{code:"PY",code3:"PRY",name:"Paraguay",number:"600"},{code:"PE",code3:"PER",name:"Peru",number:"604"},{code:"PH",code3:"PHL",name:"Philippines (the)",number:"608"},{code:"PN",code3:"PCN",name:"Pitcairn",number:"612"},{code:"PL",code3:"POL",name:"Poland",number:"616"},{code:"PT",code3:"PRT",name:"Portugal",number:"620"},{code:"PR",code3:"PRI",name:"Puerto Rico",number:"630"},{code:"QA",code3:"QAT",name:"Qatar",number:"634"},{code:"MK",code3:"MKD",name:"Republic of North Macedonia",number:"807"},{code:"RO",code3:"ROU",name:"Romania",number:"642"},{code:"RU",code3:"RUS",name:"Russian Federation (the)",number:"643"},{code:"RW",code3:"RWA",name:"Rwanda",number:"646"},{code:"RE",code3:"REU",name:"Réunion",number:"638"},{code:"BL",code3:"BLM",name:"Saint Barthélemy",number:"652"},{code:"SH",code3:"SHN",name:"Saint Helena, Ascension and Tristan da Cunha",number:"654"},{code:"KN",code3:"KNA",name:"Saint Kitts and Nevis",number:"659"},{code:"LC",code3:"LCA",name:"Saint Lucia",number:"662"},{code:"MF",code3:"MAF",name:"Saint Martin (French part)",number:"663"},{code:"PM",code3:"SPM",name:"Saint Pierre and Miquelon",number:"666"},{code:"VC",code3:"VCT",name:"Saint Vincent and the Grenadines",number:"670"},{code:"WS",code3:"WSM",name:"Samoa",number:"882"},{code:"SM",code3:"SMR",name:"San Marino",number:"674"},{code:"ST",code3:"STP",name:"Sao Tome and Principe",number:"678"},{code:"SA",code3:"SAU",name:"Saudi Arabia",number:"682"},{code:"SN",code3:"SEN",name:"Senegal",number:"686"},{code:"RS",code3:"SRB",name:"Serbia",number:"688"},{code:"SC",code3:"SYC",name:"Seychelles",number:"690"},{code:"SL",code3:"SLE",name:"Sierra Leone",number:"694"},{code:"SG",code3:"SGP",name:"Singapore",number:"702"},{code:"SX",code3:"SXM",name:"Sint Maarten (Dutch part)",number:"534"},{code:"SK",code3:"SVK",name:"Slovakia",number:"703"},{code:"SI",code3:"SVN",name:"Slovenia",number:"705"},{code:"SB",code3:"SLB",name:"Solomon Islands",number:"090"},{code:"SO",code3:"SOM",name:"Somalia",number:"706"},{code:"ZA",code3:"ZAF",name:"South Africa",number:"710"},{code:"GS",code3:"SGS",name:"South Georgia and the South Sandwich Islands",number:"239"},{code:"SS",code3:"SSD",name:"South Sudan",number:"728"},{code:"ES",code3:"ESP",name:"Spain",number:"724"},{code:"LK",code3:"LKA",name:"Sri Lanka",number:"144"},{code:"SD",code3:"SDN",name:"Sudan (the)",number:"729"},{code:"SR",code3:"SUR",name:"Suriname",number:"740"},{code:"SJ",code3:"SJM",name:"Svalbard and Jan Mayen",number:"744"},{code:"SE",code3:"SWE",name:"Sweden",number:"752"},{code:"CH",code3:"CHE",name:"Switzerland",number:"756"},{code:"SY",code3:"SYR",name:"Syrian Arab Republic",number:"760"},{code:"TW",code3:"TWN",name:"Taiwan (Province of China)",number:"158"},{code:"TJ",code3:"TJK",name:"Tajikistan",number:"762"},{code:"TZ",code3:"TZA",name:"Tanzania, United Republic of",number:"834"},{code:"TH",code3:"THA",name:"Thailand",number:"764"},{code:"TL",code3:"TLS",name:"Timor-Leste",number:"626"},{code:"TG",code3:"TGO",name:"Togo",number:"768"},{code:"TK",code3:"TKL",name:"Tokelau",number:"772"},{code:"TO",code3:"TON",name:"Tonga",number:"776"},{code:"TT",code3:"TTO",name:"Trinidad and Tobago",number:"780"},{code:"TN",code3:"TUN",name:"Tunisia",number:"788"},{code:"TR",code3:"TUR",name:"Turkey",number:"792"},{code:"TM",code3:"TKM",name:"Turkmenistan",number:"795"},{code:"TC",code3:"TCA",name:"Turks and Caicos Islands (the)",number:"796"},{code:"TV",code3:"TUV",name:"Tuvalu",number:"798"},{code:"UG",code3:"UGA",name:"Uganda",number:"800"},{code:"UA",code3:"UKR",name:"Ukraine",number:"804"},{code:"AE",code3:"ARE",name:"United Arab Emirates (the)",number:"784"},{code:"GB",code3:"GBR",name:"United Kingdom of Great Britain and Northern Ireland (the)",number:"826"},{code:"UM",code3:"UMI",name:"United States Minor Outlying Islands (the)",number:"581"},{code:"US",code3:"USA",name:"United States of America (the)",number:"840"},{code:"UY",code3:"URY",name:"Uruguay",number:"858"},{code:"UZ",code3:"UZB",name:"Uzbekistan",number:"860"},{code:"VU",code3:"VUT",name:"Vanuatu",number:"548"},{code:"VE",code3:"VEN",name:"Venezuela (Bolivarian Republic of)",number:"862"},{code:"VN",code3:"VNM",name:"Viet Nam",number:"704"},{code:"VG",code3:"VGB",name:"Virgin Islands (British)",number:"092"},{code:"VI",code3:"VIR",name:"Virgin Islands (U.S.)",number:"850"},{code:"WF",code3:"WLF",name:"Wallis and Futuna",number:"876"},{code:"EH",code3:"ESH",name:"Western Sahara",number:"732"},{code:"YE",code3:"YEM",name:"Yemen",number:"887"},{code:"ZM",code3:"ZMB",name:"Zambia",number:"894"},{code:"ZW",code3:"ZWE",name:"Zimbabwe",number:"716"},{code:"AX",code3:"ALA",name:"Åland Islands",number:"248"}];
+                </script>
+                <script src="dist/aria-autocomplete.min.js" type="text/javascript"></script>
+                <section id="examples">
+                    <h2>Examples</h2>
+                    <div class="tile" id="example-1">
+                        <h3>1. Array as Source, using default options</h3>
+                        <label for="countrylist-array">Select a country</label>
+                        <input type="text" id="countrylist-array" />
+                        <script>
+                            AriaAutocomplete(document.getElementById('countrylist-array'), { 
+                                source: countryListAllIsoData, 
+                                sourceMapping: { 'value': 'code3', 'label': 'name' }
+                            });
+                        </script>
+                        <p>When the source is an Array, it can either be an <b>Array of Strings</b>:</p>
+                        <pre><code class="lang-javascript">AriaAutocomplete(document.getElementById('input'), {
+    source: [
+        'Afghanistan',
+        'Albania',
+        'Algeria',
+        ...etc
+    ]
+});
+</code></pre>
+                        <p>Or you can use an <b>Array of Objects</b> with <code>value</code> and / or <code>label</code> properties (if only a <code>value</code> or <code>label</code> is provided, that property will be used for both):</p>
+<pre><code class="lang-javascript">AriaAutocomplete(document.getElementById('input'), {
+    source: [
+        {
+            value: 'AFG',
+            label: 'Afghanistan'
+        }, 
+        {
+            value: 'ALB',
+            label: 'Albania'
+        },
+        ...etc
+    ]
+});
+</code></pre>
+                        <p>The autocomplete will search by the <code>label</code> property by default, and set the <code>value</code> in the original element (if an <code>&lt;input /&gt;</code> was used).</p>
+                        <p>You can add an Array of Strings to the <code>alsoSearchIn</code> option to indicate other properties to filter by as well as the <code>label</code>.</p>
+                        <p>If your objects don't have <code>value</code> and / or <code>label</code> properties, and you're unable to transform them ahead of use, there is also a <code>sourceMapping</code> option:</p>
+<pre><code class="lang-javascript">AriaAutocomplete(document.getElementById('input'), {
+    source: [
+        {
+            code3: 'AFG',
+            name:' Afghanistan'
+        }, 
+        {
+            code3: 'ALB',
+            name: 'Albania'
+        },
+        ...etc
+    ],
+    sourceMapping: { 'value': 'code3', 'label': 'name' },
+    alsoSearchIn: ['value']
+});
+</code></pre>
+                    </div>
+                    <div class="tile" id="example-2">
+                        <h3>2. Progressive Enhancement, using Element(s) as Source</h3>
+                        <p><b>(With result creation, multi-select, autogrow, results limit, and show all control)</b></p>
+                        <label for="countrylist-select">Select up to 5 countries</label>
+                        <select id="countrylist-select" multiple="">
+                            <option value=''>Please select</option><option value='AFG'>Afghanistan</option><option value='ALB'>Albania</option><option value='DZA'>Algeria</option><option value='ASM'>American Samoa</option><option value='AND'>Andorra</option><option value='AGO'>Angola</option><option value='AIA'>Anguilla</option><option value='ATA'>Antarctica</option><option value='ATG'>Antigua and Barbuda</option><option value='ARG'>Argentina</option><option value='ARM'>Armenia</option><option value='ABW'selected>Aruba</option><option value='AUS'>Australia</option><option value='AUT'>Austria</option><option value='AZE'>Azerbaijan</option><option value='BHS'>Bahamas (the)</option><option value='BHR'>Bahrain</option><option value='BGD'>Bangladesh</option><option value='BRB'>Barbados</option><option value='BLR'>Belarus</option><option value='BEL'>Belgium</option><option value='BLZ'>Belize</option><option value='BEN'>Benin</option><option value='BMU'>Bermuda</option><option value='BTN'>Bhutan</option><option value='BOL'>Bolivia (Plurinational State of)</option><option value='BES'>Bonaire, Sint Eustatius and Saba</option><option value='BIH'>Bosnia and Herzegovina</option><option value='BWA'>Botswana</option><option value='BVT'>Bouvet Island</option><option value='BRA'>Brazil</option><option value='IOT'>British Indian Ocean Territory (the)</option><option value='BRN'>Brunei Darussalam</option><option value='BGR'>Bulgaria</option><option value='BFA'>Burkina Faso</option><option value='BDI'>Burundi</option><option value='CPV'>Cabo Verde</option><option value='KHM'>Cambodia</option><option value='CMR'>Cameroon</option><option value='CAN'>Canada</option><option value='CYM'>Cayman Islands (the)</option><option value='CAF'>Central African Republic (the)</option><option value='TCD'>Chad</option><option value='CHL'>Chile</option><option value='CHN'>China</option><option value='CXR'>Christmas Island</option><option value='CCK'>Cocos (Keeling) Islands (the)</option><option value='COL'>Colombia</option><option value='COM'>Comoros (the)</option><option value='COD'>Congo (the Democratic Republic of the)</option><option value='COG'>Congo (the)</option><option value='COK'>Cook Islands (the)</option><option value='CRI'>Costa Rica</option><option value='HRV'>Croatia</option><option value='CUB'>Cuba</option><option value='CUW'>Curaçao</option><option value='CYP'>Cyprus</option><option value='CZE'>Czechia</option><option value='CIV'>Côte d'Ivoire</option><option value='DNK'>Denmark</option><option value='DJI'>Djibouti</option><option value='DMA'>Dominica</option><option value='DOM'>Dominican Republic (the)</option><option value='ECU'>Ecuador</option><option value='EGY'>Egypt</option><option value='SLV'>El Salvador</option><option value='GNQ'>Equatorial Guinea</option><option value='ERI'>Eritrea</option><option value='EST'>Estonia</option><option value='SWZ'>Eswatini</option><option value='ETH'>Ethiopia</option><option value='FLK'>Falkland Islands (the) [Malvinas]</option><option value='FRO'>Faroe Islands (the)</option><option value='FJI'>Fiji</option><option value='FIN'>Finland</option><option value='FRA'>France</option><option value='GUF'>French Guiana</option><option value='PYF'>French Polynesia</option><option value='ATF'>French Southern Territories (the)</option><option value='GAB'>Gabon</option><option value='GMB'>Gambia (the)</option><option value='GEO'>Georgia</option><option value='DEU'>Germany</option><option value='GHA'>Ghana</option><option value='GIB'>Gibraltar</option><option value='GRC'>Greece</option><option value='GRL'>Greenland</option><option value='GRD'>Grenada</option><option value='GLP'>Guadeloupe</option><option value='GUM'>Guam</option><option value='GTM'>Guatemala</option><option value='GGY'>Guernsey</option><option value='GIN'>Guinea</option><option value='GNB'>Guinea-Bissau</option><option value='GUY'>Guyana</option><option value='HTI'>Haiti</option><option value='HMD'>Heard Island and McDonald Islands</option><option value='VAT'>Holy See (the)</option><option value='HND'>Honduras</option><option value='HKG'>Hong Kong</option><option value='HUN'>Hungary</option><option value='ISL'>Iceland</option><option value='IND'>India</option><option value='IDN'>Indonesia</option><option value='IRN'>Iran (Islamic Republic of)</option><option value='IRQ'>Iraq</option><option value='IRL'>Ireland</option><option value='IMN'>Isle of Man</option><option value='ISR'>Israel</option><option value='ITA'>Italy</option><option value='JAM'>Jamaica</option><option value='JPN'>Japan</option><option value='JEY'>Jersey</option><option value='JOR'>Jordan</option><option value='KAZ'>Kazakhstan</option><option value='KEN'>Kenya</option><option value='KIR'>Kiribati</option><option value='PRK'>Korea (the Democratic People's Republic of)</option><option value='KOR'>Korea (the Republic of)</option><option value='KWT'>Kuwait</option><option value='KGZ'>Kyrgyzstan</option><option value='LAO'>Lao People's Democratic Republic (the)</option><option value='LVA'>Latvia</option><option value='LBN'>Lebanon</option><option value='LSO'>Lesotho</option><option value='LBR'>Liberia</option><option value='LBY'>Libya</option><option value='LIE'>Liechtenstein</option><option value='LTU'>Lithuania</option><option value='LUX'>Luxembourg</option><option value='MAC'>Macao</option><option value='MDG'>Madagascar</option><option value='MWI'>Malawi</option><option value='MYS'>Malaysia</option><option value='MDV'>Maldives</option><option value='MLI'>Mali</option><option value='MLT'>Malta</option><option value='MHL'>Marshall Islands (the)</option><option value='MTQ'>Martinique</option><option value='MRT'>Mauritania</option><option value='MUS'>Mauritius</option><option value='MYT'>Mayotte</option><option value='MEX'>Mexico</option><option value='FSM'>Micronesia (Federated States of)</option><option value='MDA'>Moldova (the Republic of)</option><option value='MCO'>Monaco</option><option value='MNG'>Mongolia</option><option value='MNE'>Montenegro</option><option value='MSR'>Montserrat</option><option value='MAR'>Morocco</option><option value='MOZ'>Mozambique</option><option value='MMR'>Myanmar</option><option value='NAM'>Namibia</option><option value='NRU'>Nauru</option><option value='NPL'>Nepal</option><option value='NLD'>Netherlands (the)</option><option value='NCL'>New Caledonia</option><option value='NZL'>New Zealand</option><option value='NIC'>Nicaragua</option><option value='NER'>Niger (the)</option><option value='NGA'>Nigeria</option><option value='NIU'>Niue</option><option value='NFK'>Norfolk Island</option><option value='MNP'>Northern Mariana Islands (the)</option><option value='NOR'>Norway</option><option value='OMN'>Oman</option><option value='PAK'>Pakistan</option><option value='PLW'>Palau</option><option value='PSE'>Palestine, State of</option><option value='PAN'>Panama</option><option value='PNG'>Papua New Guinea</option><option value='PRY'>Paraguay</option><option value='PER'>Peru</option><option value='PHL'>Philippines (the)</option><option value='PCN'>Pitcairn</option><option value='POL'>Poland</option><option value='PRT'>Portugal</option><option value='PRI'>Puerto Rico</option><option value='QAT'>Qatar</option><option value='MKD'>Republic of North Macedonia</option><option value='ROU'>Romania</option><option value='RUS'>Russian Federation (the)</option><option value='RWA'>Rwanda</option><option value='REU'>Réunion</option><option value='BLM'>Saint Barthélemy</option><option value='SHN'>Saint Helena, Ascension and Tristan da Cunha</option><option value='KNA'>Saint Kitts and Nevis</option><option value='LCA'>Saint Lucia</option><option value='MAF'>Saint Martin (French part)</option><option value='SPM'>Saint Pierre and Miquelon</option><option value='VCT'>Saint Vincent and the Grenadines</option><option value='WSM'>Samoa</option><option value='SMR'>San Marino</option><option value='STP'>Sao Tome and Principe</option><option value='SAU'>Saudi Arabia</option><option value='SEN'>Senegal</option><option value='SRB'>Serbia</option><option value='SYC'>Seychelles</option><option value='SLE'>Sierra Leone</option><option value='SGP'>Singapore</option><option value='SXM'>Sint Maarten (Dutch part)</option><option value='SVK'>Slovakia</option><option value='SVN'>Slovenia</option><option value='SLB'>Solomon Islands</option><option value='SOM'>Somalia</option><option value='ZAF'>South Africa</option><option value='SGS'>South Georgia and the South Sandwich Islands</option><option value='SSD'>South Sudan</option><option value='ESP'>Spain</option><option value='LKA'selected>Sri Lanka</option><option value='SDN'>Sudan (the)</option><option value='SUR'>Suriname</option><option value='SJM'>Svalbard and Jan Mayen</option><option value='SWE'>Sweden</option><option value='CHE'>Switzerland</option><option value='SYR'>Syrian Arab Republic</option><option value='TWN'>Taiwan (Province of China)</option><option value='TJK'>Tajikistan</option><option value='TZA'>Tanzania, United Republic of</option><option value='THA'>Thailand</option><option value='TLS'>Timor-Leste</option><option value='TGO'>Togo</option><option value='TKL'>Tokelau</option><option value='TON'>Tonga</option><option value='TTO'>Trinidad and Tobago</option><option value='TUN'>Tunisia</option><option value='TUR'>Turkey</option><option value='TKM'>Turkmenistan</option><option value='TCA'>Turks and Caicos Islands (the)</option><option value='TUV'>Tuvalu</option><option value='UGA'>Uganda</option><option value='UKR'>Ukraine</option><option value='ARE'>United Arab Emirates (the)</option><option value='GBR'>United Kingdom of Great Britain and Northern Ireland (the)</option><option value='UMI'>United States Minor Outlying Islands (the)</option><option value='USA'>United States of America (the)</option><option value='URY'>Uruguay</option><option value='UZB'>Uzbekistan</option><option value='VUT'>Vanuatu</option><option value='VEN'>Venezuela (Bolivarian Republic of)</option><option value='VNM'>Viet Nam</option><option value='VGB'>Virgin Islands (British)</option><option value='VIR'>Virgin Islands (U.S.)</option><option value='WLF'>Wallis and Futuna</option><option value='ESH'>Western Sahara</option><option value='YEM'>Yemen</option><option value='ZMB'>Zambia</option><option value='ZWE'>Zimbabwe</option><option value='ALA'>Åland Islands</option>
+                        </select>
+                        <script>
+                            AriaAutocomplete(document.getElementById('countrylist-select'), {
+                                placeholder: 'Type to refine',
+                                deleteOnBackspace: true,
+                                showAllControl: true,
+                                autoGrow: true,
+                                maxResults: 50,
+                                create: true,
+                                minLength: 0,
+                                maxItems: 5
+                            });
+                        </script>
+                        <pre><code class="lang-javascript">AriaAutocomplete(document.querySelector('select'), {
+    placeholder: 'Type to refine',
+    deleteOnBackspace: true,
+    showAllControl: true,
+    autoGrow: true,
+    maxResults: 50,
+    create: true,
+    minLength: 0,
+    maxItems: 5
+});</code></pre>
+                        <p>If the <code>source</code> option is falsy, or is an empty Array, the autocomplete will check to see if the element used is a <code>&lt;select&gt;</code>, or if there are any checkboxes inside the element, and will build up a <code>source</code> Array from what's available.</p>
+                        <p>This example uses a <code>&lt;select&gt;</code> element; so when an option in the autocomplete is selected (or removed), the corresponding <code>&lt;option&gt;</code> element will also be selected (or deselected) as well.</p>
+                        <p>Any pre-selected <code>&lt;option&gt;</code> or checkbox elements are respected, and the <code>multiple</code> option will also be set to <code>true</code> automatically if the <code>&lt;select&gt;</code> has that attribute set. If checkboxes are used, the <code>multiple</code> option will always be set to <code>true</code>.</p>
+                        <p>When using the <code>create</code> option along with progressive enhancement, the created selections will be added to the original <code>&lt;select&gt;</code> element or checkbox list. So they will always remain as available options (both internally, and in the DOM) even after being de-selected.</p>
+                    </div>
+                    <div class="tile" id="example-3">
+                        <h3>3. Function as Source</h3>
+                        <p><b>(With delete all control and multi-select, but without autogrow)</b></p>
+                        <p>If you use a Function for the <code>source</code> with your own filtering logic, it will be passed the search query, and a render Function, which expects an Array (using either of the formats mentioned above).</p>
+                        <label for="countrylist-function">
+                            Select up to 4 countries by country code
+                            <br/>e.g. "DZA" for Algeria, "GBR" for United Kingdom.
+                        </label>
+                        <input type="text" value="GLP,ZWE" id="countrylist-function" />
+                        <script>
+                            AriaAutocomplete(document.getElementById('countrylist-function'), {
+                                maxItems: 4,
+                                maxResults: 20,
+                                multiple: true,
+                                deleteAllControl: true,
+                                placeholder: 'Type to search',
+                                source: function (query, render, isStartingCall) {
+                                    var result = [];
+                                    var value = query.toLowerCase().trim();
+                                    var arrToCheck = isStartingCall ? value.split(',') : [value];
+                                    countryListAllIsoData.forEach(function (entry) {
+                                        var code3 = entry['code3'].toLowerCase();
+                                        var addIt = false;
+                                        arrToCheck.forEach(function (val) {
+                                            if (code3.search(val) !== -1) {
+                                                addIt = true;
+                                            }
+                                        });
+                                        if (addIt) {
+                                            result.push(entry);
+                                        }
+                                    });
+                                    render(result);
+                                },
+                                onItemRender: function (itemData) {
+                                    return itemData.label + ' (' + itemData.value + ')';
+                                },
+                                sourceMapping: { 'value': 'code3', 'label': 'name' }
+                            });
+                        </script>
+                        <pre><code class="lang-typescript">AriaAutocomplete(document.getElementById('input'), {
+    maxItems: 4,
+    maxResults: 20,
+    multiple: true,
+    deleteAllControl: true,
+    placeholder: 'Type to search',
+    source: (query: string, render: (toRender: any[]) => void, isFirstCall: boolean) => {
+        const toRender: any[] = [];
+        // build up your Array here, then render...
+        render(toRender);
+    },
+    onItemRender: (itemData: any) => {
+        return `${itemData.label} (${itemData.value})`;
+    }
+});
+</code></pre>
+                        <p>The <code>source</code> function can also be a <code>Promise</code> which resolves with the items to render, instead of having to use the provided second argument callback.</p>
+                        <p>If the autocomplete is initialised on an <code>&lt;input /&gt;</code> with a starting value, the <code>source</code> function will also be called immediately using that value. In this case, the render function expects an Array of <b>possible</b> entries to check that starting value against, to determine what the starting label (or multi-select elements) should be.</p>
+                        <p>The <code>onItemRender</code> callback is also being used here to display the code next to the country name in the results.</p>
+                        <p>The initialised input's starting value is "GLP,ZWE" - the country codes for Guadeloupe and Zimbabwe respectively.</p>
+                    </div>
+                    <div class="tile" id="example-4">
+                        <h3>4. String (endpoint) as Source</h3>
+                        <p>If you want to send the query to an endpoint, you can do that too.</p>
+                        <label for="countrylist-endpoint">Select a country</label>
+                        <input type="text" value="CAN" id="countrylist-endpoint" />
+                        <script>
+                            AriaAutocomplete(document.getElementById('countrylist-endpoint'), {
+                                source: 'countrylistallisodata.json',
+                                asyncMaxResultsParam: 'limit',
+                                asyncQueryParam: 'q',
+                                maxResults: 25,
+                                sourceMapping: { 'value': 'code3', 'label': 'name' },
+                                onAsyncSuccess: function (query, xhr, isStartingCall) {
+                                    var result = [];
+                                    var value = query.toLowerCase().trim();
+                                    var response = JSON.parse(xhr.responseText);
+                                    var propToCheck = isStartingCall ? 'value' : 'name';
+                                    response.forEach(function (entry) {
+                                        if (entry[propToCheck].toLowerCase().search(value) !== -1) {
+                                            result.push(entry);
+                                        }
+                                    });
+                                    return result;
+                                }
+                            });
+                        </script>
+                        <pre><code class="lang-typescript">AriaAutocomplete(document.getElementById('input'), {
+    source: 'some-url-here/endpoint',
+    onAsyncPrep: (url: string) => url,
+    onAsyncSuccess: (query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => {
+        return JSON.parse(xhr.responseText);
+    },
+    asyncMaxResultsParam: 'limit',
+    asyncQueryParam: 'q',
+    maxResults: 25
+});
+</code></pre>
+                        <p>As with a Function as the <code>source</code>, if the autocomplete is initialised on an input with a starting value, the endpoint will be called immediately.</p>
+                        <p>The current query and <code>maxResults</code> will be added to the url using the <code>asyncQueryParam</code> and <code>asyncMaxResultsParam</code> options respectively.</p>
+                        <p>E.g. https://some-url-here/endpoint?<b>q</b>=norway&<b>limit</b>=20.</p>
+                        <p>You can also use the <code>onAsyncPrep</code> callback to modify the URL.</p>
+                        <p>This example has no filtering in the request, as it's just requesting a JSON file, so it's doing some basic filtering in the <code>onAsyncSuccess</code> callback. The initialised input's starting value is "CAN" (the code3 property for Canada).</p>
+                    </div>
+                    <div class="tile" id="example-5">
+                        <h3>5. Array as Source, with Result Creation and Multi-Select</h3>
+                        <p>This example simulates a tagging input. It has a small <code>source</code> array, but with result creation enabled, and includes starting values not included in the <code>source</code>.</p>
+                        <label for="contacts-array">Select some people</label>
+                        <input type="text" value="Sophie,Alan (not in the list),John,Josie (not in the list)" id="contacts-array" />
+                        <script>
+                            AriaAutocomplete(document.getElementById('contacts-array'), {
+                                source: ['Sophie', 'John', 'Grace', 'Mark', 'Steve', 'Cassandra'],
+                                onItemRender: function (itemData) {
+                                    var label = itemData.label;
+                                    if (this.options.source.indexOf(label) === -1) {
+                                        return 'Add ' + label + '...';
+                                    }
+                                    return label;
+                                },
+                                deleteOnBackspace: true,
+                                autoGrow: true,
+                                multiple: true,
+                                minLength: 0,
+                                create: true
+                            });
+                        </script>
+                        <pre><code class="lang-typescript">const autocomplete = AriaAutocomplete(document.getElementById('input'), {
+    source: ['Sophie', 'John', ...more],
+    onItemRender: ({ label }) => {
+        if (!autocomplete.options.source.includes(label)) {
+            return `Add ${label}...`;
+        }
+        return label;
+    },
+    deleteOnBackspace: true,
+    autoGrow: true,
+    multiple: true,
+    minLength: 0,
+    create: true
+});
+</code></pre>
+                    </div>
+                    <p>All component options that accept a Function will have their context (<code>this</code>) set to include the full autocomplete API (assuming you use an ordinary function expression instead of arrow functions). The only exception to this is the Function and Endpoint starting cases mentioned above, where the context is not manually set. So you can check for the API's existence, or check the context against the window object, to check if it's the starting call (or use the provided final param in the relevant callbacks).</p>
+                </section>
+            
+                <section id="options">
+                    <h2>Options</h2>
+                    <p>The full list of available options is as follows:</p>
+                    <div class="tile">
+                        <h3>Core options</h3>
+                        <dl>
+                            <div>
+                                <dt>name: <code>string</code></dt>
+                                <dd>Give the autocomplete a name so that (in single-select mode) its value will be included in form submissions.<br>(Instead of using this option, I would advise initialising the autocomplete on an existing input that will be submitted; this approach is compatible with the control in multiple mode)</dd>
+                                <dt>source: <code>string[] | any[] | string | Function | Promise<any[]></code></dt>
+                                <dd>string for async endpoint, array of strings, array of objects with value and label, or function</dd>
+                                <dt>sourceMapping: <code>Object</code></dt>
+                                <dd>an object detailing the properties to use for the label and value when using an Array of Objects as the source - see Array examples above.</dd>
+                                <dt>alsoSearchIn: <code>string[]</code></dt>
+                                <dd>Additional properties to use when searching for a match</dd>
+                            </div>
+                            <div>
+                                <dt>create: <code>boolean | Function</code></dt>
+                                <dd>
+                                    If no exact match is found, create an entry in the results list for the current search text.
+                                    Can use a function that receives the search term, and returns a string or an object (like a normal static source entry).
+                                    <br>Default: <code>false</code>
+                                </dd>
+                                <dt>delay: <code>number</code></dt>
+                                <dd>input delay before running a search<br>Default: <code>100</code></dd>
+                                <dt>minLength: <code>number</code></dt>
+                                <dd>Minimum number of characters to run a search (includes spaces)<br>Default: <code>1</code></dd>
+                                <dt>maxResults: <code>number</code></dt>
+                                <dd>Maximum number of results to render<br>Default: <code>9999</code></dd>
+                                <dt>showAllControl: <code>boolean</code></dt>
+                                <dd>Render a button that triggers showing all options<br>Default: <code>false</code></dd>
+                                <dt>confirmOnBlur: <code>boolean | Function</code></dt>
+                                <dd>
+                                    Confirm current selection (from using arrow keys) when blurring off of the control. Will also check for a label match if there is no current selection.<br>
+                                    Can use a function which receives the search term and results, and returns a string to be used to compare against the result labels.<br>
+                                    Default: <code>true</code>
+                                </dd>
+                            </div>
+                            <div>
+                                <dt>multiple: <code>boolean</code></dt>
+                                <dd>Allow multiple items to be selected<br>Default: <code>false</code></dd>
+                                <dt>autoGrow: <code>boolean</code></dt>
+                                <dd>Set input width to match its content<br>Default: <code>false</code></dd>
+                                <dt>maxItems: <code>number</code></dt>
+                                <dd>Maximum number of items that can be selected in multiple mode<br>Default: <code>9999</code></dd>
+                                <dt>multipleSeparator: <code>string</code></dt>
+                                <dd>In multiple mode, if the original element was an input, the character that separates the values<br>Default: <code>`,`</code></dd>
+                                <dt>deleteOnBackspace: <code>boolean</code></dt>
+                                <dd>If input is empty and in multiple mode, delete last selected item on backspace<br>Default: <code>false</code></dd>
+                                <dt>deleteAllControl: <code>boolean</code></dt>
+                                <dd>In multiple mode, if more than 1 item is selected, add a button at the beginning of the selected items as a shortcut to delete all<br>Default: <code>false</code></dd>
+                                <dt>deleteAllText: <code>string</code></dt>
+                                <dd>Text to use in the <code>deleteAllControl</code><br>Default: <code>`Delete all`</code></dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="tile">
+                        <h3>Async mode options</h3>
+                        <dl>
+                            <dt>asyncQueryParam: <code>string</code></dt>
+                            <dd>When source is a string, param to use when adding input value to it<br>Default: <code>`q`</code></dd>
+                            <dt>asyncMaxResultsParam: <code>string</code></dt>
+                            <dd>When source is a string, param to use when adding maxResults option (+ current selected count in multiple mode) to it<br>Default: <code>`limit`</code></dd>
+                        </dl>
+                    </div>
+                    <div class="tile">
+                        <h3>Styling / rendering options</h3>
+                        <dl>
+                            <dt>placeholder: <code>string</code></dt>
+                            <dd>Placeholder text to show in generated input<br>Default: <code>``</code></dd>
+                            <dt>noResultsText: <code>string</code></dt>
+                            <dd>Text to show (and announce to screen readers) if no results are found. If this is an empty string, the list will close instead<br>Default: <code>`No results`</code></dd>
+                            <dt>cssNameSpace: <code>string</code></dt>
+                            <dd>The string to prepend to all main classes for BEM naming e.g. `aria-autocomplete__input`<br>(Some other generic class-names are used alongside these as well, such as <code>`disabled`</code>, <code>`focused`</code>, <code>`hidden`</code>, etc.)<br>Default: <code>`aria-autocomplete`</code></dd>
+                            <dt>listClassName: <code>string</code></dt>
+                            <dd>Custom class name to add to the generated list element<br>Default: <code>``</code></dd>
+                            <dt>inputClassName: <code>string</code></dt>
+                            <dd>Custom class name to add to the generated input element<br>Default: <code>``</code></dd>
+                            <dt>wrapperClassName: <code>string</code></dt>
+                            <dd>Custom class name to add to the generated component wrapper<br>Default: <code>``</code></dd>
+                        </dl>
+                    </div>
+                    <div class="tile">
+                        <h3>Screen reader enhancements</h3>
+                        <dl>
+                            <div>
+                                <dt>srDelay: <code>number</code></dt>
+                                <dd>
+                                    Set the delay in milliseconds before screen reader announcements are made.<br>
+                                    Note: if this is too short, some default announcements may interrupt it.<br>
+                                    Default: <code>5000</code>
+                                </dd>
+                                <dt>srAutoClear: <code>boolean | number</code></dt>
+                                <dd>Automatically clear the screen reader announcement element after the specified delay. Number is in milliseconds.<br>Default: <code>10000</code></dd>
+                                <dt>srDeleteText: <code>string</code></dt>
+                                <dd>In multi mode, screen reader text used for element deletion - prepended to label<br>Default: <code>`delete`</code></dd>
+                                <dt>srDeletedText: <code>string</code></dt>
+                                <dd>Screen reader text announced after deletion - appended to label<br>Default: <code>`deleted`</code></dd>
+                                <dt>srShowAllText: <code>string</code></dt>
+                                <dd>Screen reader text for the show all button<br>Default: <code>`Show all`</code></dd>
+                                <dt>srSelectedText: <code>string</code></dt>
+                                <dd>Screen reader text announced after selection - appended to label<br>Default: <code>`selected`</code></dd>
+                                <dt>srListLabelText: <code>string</code></dt>
+                                <dd>Screen reader explainer added to the list element via aria-label attribute<br>Default: <code>`Search suggestions`</code></dd>
+                                <dt>srAssistiveText: <code>string</code></dt>
+                                <dd>Screen reader description used for main input when empty<br>Default: <code>`When results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures.`</code></dd>
+                                <dt>srAssistiveTextAutoClear: <code>boolean</code></dt>
+                                <dd>
+                                    Automatically remove the srAssistiveText once user input is detected, to reduce screen reader verbosity.<br>
+                                    The text is re-associated with the generated input if its value is emptied.<br>
+                                    Default: <code>5000</code>
+                                </dd>
+                                <dt>srResultsText: <code>Function</code></dt>
+                                <dd>Screen reader announcement after results are rendered<br>Default: <code>length => `${length} ${length === 1 ? 'result' : 'results'} available.`</code></dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="tile">
+                        <h3>Callbacks</h3>
+                        <dl>
+                            <dt>onSearch: <code>Function</code></dt>
+                            <dd>
+                                Before search is performed - can be used to affect search value by returning a new one<br>
+                                Default: <code>(query: string) => query</code>
+                            </dd>
+                            <dt>onAsyncPrep: <code>Function</code></dt>
+                            <dd>
+                                Callback before async call is made - receives the URL. Can be used to format the endpoint URL by returning a String, and for changes to the XHR object.<br>
+                                Note: this is before the <code>onload</code> and <code>onerror</code> functions are attached, and before the <code>open</code> method is called
+                                Default: <code>(url: string, xhr: XMLHttpRequest, isFirstCall: boolean) => url</code>
+                            </dd>
+                            <dt>onAsyncBeforeSend: <code>Function</code></dt>
+                            <dd>
+                                Callback before async call is sent - receives the XHR object. Can be used for final changes to the XHR object, such as adding auth headers<br>
+                                Default: <code>(query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => {}</code>
+                            </dd>
+                            <dt>onAsyncSuccess: <code>Function</code></dt>
+                            <dd>
+                                After async call succeeds, but before the results render - is passed the value and the XHR Object. Can be used to format the results by returning an Array<br>
+                                Default: <code>(query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => xhr.responseText</code>
+                            </dd>
+                            <dt>onAsyncComplete: <code>Function</code></dt>
+                            <dd>
+                                After async call completes successfully, and after the results have rendered.<br>
+                                Default: <code>(query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => {}</code>
+                            </dd>
+                            <dt>onAsyncError: <code>Function</code></dt>
+                            <dd>
+                                If async call fails - is passed the value and the XHR Object.
+                                <br>Default: <code>(query, xhr: XMLHttpRequest, isFirstCall: boolean) => {}</code>
+                            </dd>
+                            <dt>onItemRender: <code>Function</code></dt>
+                            <dd>
+                                Called for each item rendered in the list - Can be used to format the <code>&lt;li&gt;</code> content by returning a String<br>
+                                Default: <code>(itemData: any) => itemData.label</code>
+                            </dd>
+                            <dt>onResponse: <code>Function</code></dt>
+                            <dd>
+                                Prior to rendering - can be used to format the results by returning an Array<br>
+                                Default: <code>(optionsToRender: any[]) => optionsToRender</code>
+                            </dd>
+                            <dt>onConfirm: <code>Function</code></dt>
+                            <dd>
+                                After an autocomplete selection is made<br>
+                                Default: <code>(selection: any) => {}</code>
+                            </dd>
+                            <dt>onDelete: <code>Function</code></dt>
+                            <dd>
+                                After an autocomplete selection is deleted (programmatically in single-select mode, or by user action in multi-select mode)<br>
+                                Default: <code>(deletion: any) => {}</code>
+                            </dd>
+                            <dt>onChange: <code>Function</code></dt>
+                            <dd>
+                                When the selected item(s) changes<br>
+                                Default: <code>(selectedItems: any[]) => {}</code>
+                            </dd>
+                            <dt>onFocus: <code>Function</code></dt>
+                            <dd>
+                                When the overall component receives focus<br>
+                                Default: <code>(componentWrapper: HTMLDivElement) => {}</code>
+                            </dd>
+                            <dt>onBlur: <code>Function</code></dt>
+                            <dd>
+                                When the overall component loses focus<br>
+                                Default: <code>(componentWrapper: HTMLDivElement) => {}</code>
+                            </dd>
+                            <dt>onReady: <code>Function</code></dt>
+                            <dd>
+                                When main script processing and initial rendering has finished<br>
+                                Default: <code>(componentWrapper: HTMLDivElement) => {}</code>
+                            </dd>
+                            <dt>onClose: <code>Function</code></dt>
+                            <dd>
+                                When list area closes<br>
+                                Default: <code>(listElement: HTMLUListElement) => {}</code>
+                            </dd>
+                            <dt>onOpen: <code>Function</code></dt>
+                            <dd>
+                                When list area opens<br>
+                                Default: <code>(listElement: HTMLUListElement) => {}</code>
+                            </dd>
+                        </dl>
+                    </div>
+                </section>
+            </main>
+            <footer>
+                <a class="button" href="https://www.github.com/mynamesleon/aria-autocomplete">On GitHub</a>
+            </footer>
+        </div>
+        <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>
